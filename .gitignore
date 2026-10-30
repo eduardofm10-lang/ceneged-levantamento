@@ -1,0 +1,29 @@
+# NUNCA subir para o GitHub: dados da empresa e do cliente
+*.pdf
+*.PDF
+*.db
+*.db-journal
+/dados/
+pasta_dados.txt
+ceneged_*.json
+*.xlsx
+*.xls
+*.csv
+testes/pdfs/
+testes/dados/
+testes/esperado/
+banco_mongo.txt
+
+# gerados pelo GERAR_INSTALADOR.bat
+instalador/.build/
+instalador/build/
+instalador/dist/
+instalador/*.exe
+*.spec
+
+# Python / sistema
+__pycache__/
+*.pyc
+Thumbs.db
+Desktop.ini
+~$*
