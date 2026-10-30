@@ -1,0 +1,461 @@
+CENEGED · LEVANTAMENTO DE MATERIAIS
+Como gerar o instalador e liberar para os colaboradores
+=======================================================
+
+Os dados (usuários, cadastro, composições, normativos, carteira e projetos) ficam no
+banco de dados MongoDB Atlas, na nuvem. Não precisa de pasta compartilhada nem de
+computador ligado: cada pessoa instala o programa e usa de qualquer lugar com internet.
+
+O que tem nesta pasta
+---------------------
+  ..\iniciar.py e ..\ceneged\  o programa (na pasta de cima)
+  banco_mongo.txt            endereço e senha do banco (VOCÊ cria a partir do
+                             banco_mongo.exemplo.txt; fica fora do GitHub)
+  GERAR_INSTALADOR.bat       gera o instalador e publica a atualização
+  publicar_atualizacao.py    usado pelo GERAR_INSTALADOR.bat (não precisa abrir)
+  instalador.iss             receita do instalador (não precisa abrir)
+  ceneged.ico                ícone
+  LEIA-ME.txt                este guia
+  COMECE_AQUI.txt            resumo em forma de lista
+
+Tudo isto é feito só no SEU computador (administrador).
+Os colaboradores só recebem o Instalar_CenegedLevantamento.exe.
+
+
+PASSO 1 — Preparar o banco (uma vez, no site do MongoDB Atlas)
+--------------------------------------------------------------
+1. Database Access: o usuário do banco precisa ter uma senha que só você conhece.
+2. Network Access > Add IP Address > Allow Access from Anywhere (0.0.0.0/0) > Confirm.
+3. Abra o banco_mongo.txt no Bloco de Notas e troque COLOQUE_A_SENHA_AQUI pela senha
+   do usuário do banco. Salve. (Não mande esse arquivo para ninguém.)
+
+
+PASSO 2 — Instalar o Python (só no seu computador, uma vez)
+-----------------------------------------------------------
+Baixe em python.org e, na primeira tela, MARQUE "Add python.exe to PATH".
+
+
+PASSO 3 — Gerar o instalador
+----------------------------
+1. Dê dois cliques em GERAR_INSTALADOR.bat (5 a 15 minutos na primeira vez;
+   se pedir para instalar o Inno Setup, clique Sim).
+2. No fim aparece PRONTO! e "Versão X publicada no banco de dados".
+3. O Instalar_CenegedLevantamento.exe fica nesta pasta.
+
+
+PASSO 4 — Instalar no SEU computador primeiro
+---------------------------------------------
+Rode o Instalar_CenegedLevantamento.exe e entre com seu usuário e senha.
+Na primeira vez, o programa leva para o banco tudo o que existia antes
+(pasta dados do OneDrive ou ceneged.db). Faça isso no SEU computador antes dos outros.
+
+
+PASSO 5 — Criar o acesso de cada colaborador
+--------------------------------------------
+No programa: menu ☰ > Usuários > preencha usuário, nome e senha > Salvar.
+
+
+PASSO 6 — Enviar para os colaboradores
+--------------------------------------
+Mande o Instalar_CenegedLevantamento.exe (e-mail, Teams, pendrive). O colaborador:
+1. dá dois cliques nele (tela azul do Windows: "Mais informações" > "Executar assim mesmo");
+2. clica em Avançar até Concluir;
+3. entra com o usuário e a senha que você criou.
+
+
+CADASTRO DE MATERIAIS (código + nome)
+-------------------------------------
+Menu ☰ > Cadastro de materiais > Carregar planilha.
+A planilha precisa ter, na linha 1:  A1 = Código   e   B1 = Material
+e, da linha 2 para baixo, o código e o nome de cada material.
+("Baixar modelo" gera a planilha pronta.)
+O código é o que sai na coluna Codigo_Material do relatório.
+
+
+MATERIAIS EXTRAS (planilha de materiais interligados)
+-----------------------------------------------------
+Menu ☰ > Materiais extras > "Carregar planilha".
+Colunas: Material | Código | UND | Qtd por unid. lançada | Movimento
+  verde       = classificação (POSTE DE CONCRETO BT, ATERRAMENTOS...)
+  azul claro  = material principal (ex.: RES-0190 · FLBIT)
+  branco      = materiais que vêm junto com o principal
+
+- Quando o principal aparece num balão (FLBIT, IT-R, CE3...), entram os
+  materiais dele multiplicados pela quantidade lançada. Cabos (ex.: PB35 =
+  35 MULT) são por metro.
+- Postes são achados pelo número: 9600FV = 9/600 de fibra, 11400D = 11/400 DT.
+- Estrutura com variante "(POSTE CIRC 12/1000)" é usada quando o poste do
+  balão é esse.
+- O que já veio no balão não é repetido.
+- Tudo pode ser mudado no programa: criar, excluir ou alterar principais e
+  materiais, mudar quantidades, e ligar outros nomes usados nos projetos
+  (ex.: ATRINT BT -> ATERRAM. DE SECUNDÁRIO).
+- "Baixar planilha" gera a planilha com as alterações, para editar no Excel
+  e carregar de novo.
+
+ALÇA PREFORMADA DE DISTRIBUIÇÃO (pela bitola do cabo PB)
+--------------------------------------------------------
+Em qualquer material principal que tenha ALCA PREF DIST GALV nos
+materiais extras, a alça é trocada pela bitola do cabo:
+  PB50  -> 3430550 ALCA PREF DIST GALV 35,00MM2
+  PB70  -> 3430545 ALCA PREF DIST GALV 50,00MM2 N. ISOL.
+  PB120 -> 3430549 ALCA PREF DIST GALV 70,00MM2 N. ISOL.
+- Cada lado da rede que sai do poste tem o seu cabo (o PB do balão de cabo
+  cuja chamada encosta na rede naquela direção). Ex.: 2 alças com PB70 de
+  um lado e PB35 do outro = uma alça de cada.
+- Um cabo só passando: todas as alças pelo cabo que passa. Se a quantidade
+  não divide certo pelos lados, vale o cabo mais grosso.
+- Lado sem balão de cabo: vale o cabo PB mais perto. Cabo fora da tabela
+  (ex.: PB35): fica a alça da planilha.
+- Na conferência aparece de onde veio, ex.: "FLABIT (PB70)".
+
+CERCA: SECCIONAMENTO + ATERRAMENTO (SIT. 01) - TRECHO POR TRECHO
+-----------------------------------------------------------------
+O programa lê no desenho (dentro do projeto):
+  - "N FIOS" escrito (ex.: CERCA 9 FIOS)
+  - figuras de aterramento de cerca (círculo com o sinal de terra)
+  - figuras de seccionamento (círculo cheio/hachurado com a barra)
+Cada CERCA desenhada é um trecho: o programa segue a linha da cerca
+(tracejada, com quadradinhos ou "x") onde estão as figuras; as figuras e
+o "N FIOS" que ficam nessa mesma linha são do mesmo trecho. Figuras fora
+de uma cerca achada ficam com o "N FIOS" mais perto.
+A cerca do trecho fica pintada de rosa (magenta) por cima do projeto (a tela dá
+zoom nela). Para corrigir o traçado, na janela:
+  Aumentar   clique numa linha do desenho: ela entra na cerca (segue o
+             tracejado até o fim)
+  Diminuir   arraste um retângulo: a parte rosa dentro sai
+  Apagar     tira a linha rosa toda
+Ao aumentar/diminuir, as figuras e o "N FIOS" da cerca são recontados.
+Cancela/portão: quando a cerca passa por uma cancela (desenhada de qualquer
+forma) o programa continua a mesma cerca do outro lado, desde que o desenho
+da cancela encoste nas duas pontas da cerca.
+Vale como cerca se algum trecho tiver 2 das 3 informações.
+Abre uma janela pequena por trecho ("trecho 1 de 5"...), com o desenho
+centralizado no trecho:
+  OK                  confere e vai para o próximo trecho
+  Marcar              clique no desenho: em cada figura (clicar de novo
+                      tira) ou no texto "N FIOS". Esc termina.
+  Não é trecho        ignora esse trecho
+  + Trecho            cria outro trecho (abre no fim)
+  Não tem cerca       ignora tudo
+Fica guardado para o PDF. Botão "Cerca" (em cima da lista de balões)
+abre de novo.
+Os materiais vêm de "SIT. 01 - SECCIONAMENTO + ATERRAMENTOS" em
+Materiais extras, com a quantidade da planilha multiplicada assim:
+  SECCIONADOR          qtd x seccionamentos x fios
+  CONECTOR L de cerca  qtd x fios x aterramentos
+  HASTE e ARAME        qtd x aterramentos
+  outros               qtd (uma vez)
+Ex.: 9 fios, 3 aterr., 2 secc. -> 27 conectores, 18 seccionadores,
+3 hastes, 0,6 kg de arame.
+"+ Adicionar material" com a SIT. 01 também abre a janela para digitar.
+
+FLBIT / FLABIT E CONECTOR PERFURANTE
+------------------------------------
+- Os conectores perfurantes do FLBIT/FLABIT vêm só do que estiver
+  cadastrado em Materiais extras (o programa não acrescenta nenhum).
+- FLBIT/FLABIT sozinho no balão: os conectores dele entram sempre
+  (no fim ou no meio da rede).
+- FLBIT/FLABIT junto com IT-R ou ITF-R no mesmo balão:
+    MEIO da rede: somam os conectores dos dois;
+    FIM da rede:  ficam só os do IT-R/ITF-R.
+- O programa vê pelo desenho: segue a chamada do balão até o poste e olha
+  as linhas coloridas da rede (tracejadas ou contínuas). Se a rede sai do
+  poste para um lado só = fim; se passa ou se divide = meio. Sem como ver,
+  considera meio.
+- Só contam as linhas da cor da baixa tensão daquele projeto: a cor da
+  linha onde encostam as chamadas dos balões de cabo PB (PB35, PB70...).
+  Assim a média tensão passando no poste não vira "meio". Sem balão PB
+  na folha, contam todas as linhas coloridas.
+- Na tela inicial, o poste fica marcado com um círculo: laranja = FIM,
+  azul = MEIO. Na lista de balões aparece [FIM de rede] / [MEIO de rede].
+- Para corrigir: selecione o balão e clique "Fim / meio de rede" (alterna),
+  ou botão direito > fim / meio / automático. Fica guardado para o PDF.
+
+AJUSTES NA PÁGINA INICIAL
+-------------------------
+Embaixo da prévia do relatório:
+  + Adicionar material   material avulso ou um principal inteiro
+  Alterar quantidade     (ou dois cliques na linha)
+  Trocar material        troca por outro material com a mesma quantidade
+                         (ex.: 5 alças de 35 mm -> 5 alças de 50 mm)
+  Tirar do relatório     (ou tecla Delete)
+  Desfazer ajustes       volta ao que o programa calculou
+Os ajustes e as correções de balões ficam guardados para aquele PDF
+(arquivo ceneged_projetos.json): voltam quando ele for aberto de novo.
+
+
+CADASTRO DE EQUIPE E CARTEIRA DE OBRA
+-------------------------------------
+Menu ☰ > Cadastro de equipe: cadastre as pessoas (supervisor, encarregado,
+colaborador) e monte as equipes (código, supervisor, encarregado e
+colaboradores).
+Menu ☰ > Carteira de obra: "+ Novo lançamento" abre o formulário; dois
+cliques numa linha para alterar. "Importar planilha" traz a carteira que já
+existe no Excel; "Exportar Excel" gera a planilha com os filtros da tela.
+
+
+RELATÓRIO
+---------
+"Exportar relatório" gera uma planilha por projeto no formato:
+  Codigo_Material | Material | Quantidade | Serial | Valor | Situacao (NV) | NCA |
+  Fabricante | Patrimonio | Caixa | Local
+Materiais sem código entram em vermelho. Junto pode sair a planilha
+"_conferencia" com a descrição, o movimento, de onde veio cada material e
+as pendências.
+
+
+PROJETO EM PDF COM OS BALÕES CORRIGIDOS
+---------------------------------------
+- Quando alguém usa "Corrigir texto" (ou marca um balão à mão), o desenho na tela já
+  mostra o texto novo dentro do balão, com um contorno vermelho.
+- Em "Exportar relatório", a opção "Salvar também o projeto em PDF com os balões
+  corrigidos" (vem marcada) salva, na mesma pasta do relatório, o arquivo
+  "<projeto> - baloes corrigidos.pdf": o texto antigo é coberto de branco e o texto novo
+  escrito no lugar, na mesma direção. O PDF original não é alterado.
+- Projeto sem nenhum balão corrigido não gera esse PDF (a mensagem final avisa).
+
+
+NO DIA A DIA
+------------
+- Bloquear alguém: ☰ > Usuários > selecione > Desativar (ou Excluir).
+- Esqueceu a senha: selecione a pessoa, digite uma senha nova, Salvar.
+- "Sem conexão com o banco de dados" ao abrir: o computador está sem internet
+  (ou a rede bloqueia). Resolva e clique em "Tentar de novo".
+- Backup: automático, uma vez por dia, na pasta Documentos de quem é
+  administrador (Ceneged Levantamento - Backup).
+
+
+ATUALIZAR O PROGRAMA (não precisa desinstalar nem ir em cada computador)
+-------------------------------------------------------------------------
+1. Troque os arquivos novos nesta pasta.
+2. Abra o GERAR_INSTALADOR.bat no Bloco de Notas (botão direito > Editar)
+   e aumente a versão na linha  set VERSAO=1.6  (ex.: 1.7, depois 1.8...). Salve.
+3. Dê dois cliques no GERAR_INSTALADOR.bat. No fim ele publica a versão nova no
+   banco de dados.
+4. Na próxima vez que cada pessoa abrir o programa aparece:
+      "Existe uma versão nova do programa. Atualizar agora?"
+   Ela clica em Sim: o programa baixa a versão nova do banco, fecha, atualiza
+   sozinho e abre de novo. Nada se perde.
+
+A versão instalada aparece no rodapé da tela de login.
+
+Para testar uma mudança antes de gerar o instalador, abra o Prompt de
+Comando na pasta do repositório (a de cima) e rode:
+      python iniciar.py
+
+BALÕES QUADRADOS (canto vivo) - FORA DO FORMATO HABITUAL
+Quando a folha não tem nenhum balão no formato habitual, o programa procura os
+balões em caixa quadrada (canto vivo) e traz todos: cada linha do balão é um
+material (ex.: "400/12" e "CE1"). A metragem escrita no vão do cabo não entra
+nesses balões (são de poste/estrutura). A barra de baixo avisa que o projeto
+veio nesse formato: confira a lista e, se faltar algum, use "+ Marcar balão".
+Ficam de fora as caixas da legenda e as caixas de texto comprido.
+Letras desenhadas (sem texto no PDF) em fonte com serifa também são lidas.
+Folha com os dois tipos (balões arredondados e quadrados): a caixa quadrada cuja
+primeira linha é o poste no formato esforço/altura ("400/12", "1000/12") também
+vale como balão. Os metros de cada vão vão para o cabo da própria linha:
+o cabo principal segue pelas curvas nos postes; o ramal que sai do meio da linha
+fica com o cabo do balão dele (ex.: "3#4CAA"). Metro escrito na rede existente
+(linha contínua de outra cor) não entra. Texto inclinado ao longo do cabo é lido.
+Nesse tipo de projeto, os balões de cabo (caixa comprida com o cabo escrito em
+traço simples, ex.: "3#185mm²2-XLPE") encostados no tracejado também são lidos, e
+a metragem escrita vão a vão ao longo do tracejado é somada para o cabo. Só
+entram os tracejados que têm caixa de cabo (a metragem da rede existente fica
+de fora).
+
+ATERRAMENTO DE CERCA EM FORMA DE HALTER
+Além do círculo com o sinal de terra, o programa reconhece o aterramento de cerca
+desenhado como duas bolinhas preenchidas (ou hachuradas) ligadas por um traço.
+Seccionamento ou aterramento que não estão desenhados no projeto: digite a
+quantidade na janela da cerca. Os três números (fios, aterramentos e
+seccionamentos) são obrigatórios e maiores que zero.
+
+LEITURA DE LETRAS DESENHADAS EM QUALQUER FONTE E IGUAL EM QUALQUER COMPUTADOR
+Para ler texto desenhado (sem texto no PDF), o programa compara cada letra com
+letras-modelo de 30 fontes de famílias diferentes (sem serifa, com serifa,
+estreitas e de largura fixa), que vêm dentro do próprio programa. Assim lê
+letra desenhada em qualquer fonte, e todos os computadores leem igual (não
+depende das fontes instaladas no Windows).
+Letras parecidas com números são corrigidas pelo contexto: dentro de um número,
+"O" vira 0, "l"/"I" vira 1 e "S" depois de algarismo vira 5.
+Texto em itálico é lido, mas com menos acerto.
+
+LIMITE DE ARQUIVOS
+Agora são até 15 PDFs por vez.
+
+PROJETOS COM LETRA DE TRAÇO (ex.: 421451, folhas 7 a 12)
+- Texto feito de linhas (sem preenchimento), em qualquer fonte e inclinado ao
+  longo do cabo, agora é lido (inclusive itálico, com menos acerto).
+- Balão de poste em retângulo com divisória ("400/12" em cima, "N1" embaixo):
+  cada linha vira um material.
+- Cabo escrito em caixa inclinada ao lado do tracejado ("3xS4/0-13,8kV"): o texto
+  de mesma cor do tracejado dá o nome do cabo; o metro escrito ao lado da caixa
+  vai para esse cabo; trechos do cabo em linha contínua também contam.
+- Texto riscado (ex.: "3#1/0CAA" verde riscado) é cabo existente a retirar: não
+  entra como cabo novo.
+- Metro escrito na rede existente (linha colorida de outra cor) não entra.
+- Cerca: a caixa "SEC. DE CERCA / ATER. DE CERCA (10 FIOS)" dá o número de fios, e
+  o seccionamento desenhado como círculo com duas barras ("//") é reconhecido.
+- Essas folhas demoram mais para ler (cerca de 2 a 3 minutos cada).
+
+- Material com "+" (ex.: "ATRINT MT + BT") vem inteiro, do jeito que está no balão; quem confere escolhe o que fazer.
+
+BANCO DE DADOS (ceneged.db)
+- Usuários, cadastro de materiais, composições, equipes, carteira, projetos
+  (correções de cada PDF) e constantes ficam todos num arquivo só: ceneged.db,
+  na pasta de dados (a do programa, ou a escrita em pasta_dados.txt).
+- Na primeira vez que a versão nova abre, os arquivos ceneged_*.json que já
+  existem são copiados para o banco automaticamente. Os .json continuam na
+  pasta como cópia de segurança, mas não são mais usados.
+- Para levar os dados para outro computador ou outra pasta, basta copiar o
+  ceneged.db (com o programa fechado).
+- Todos que usam a mesma pasta de dados precisam estar na versão nova; quem
+  ainda estiver na versão antiga continua gravando nos .json.
+- Fim/meio de rede: a baixa tensão desenhada em tracejado (traços longos e
+  espaçados) também conta para saber se o poste é fim ou meio de rede.
+- Tabelas para consulta no banco (abrem em linhas e colunas num visualizador de
+  SQLite, como o "SQLite Viewer" do VS Code ou o DB Browser for SQLite):
+  cadastro_materiais, cadastro_de_para, cadastro_extras, cadastro_apelidos,
+  cadastro_escolhas, cadastro_config, usuarios (sem senha), composicoes,
+  composicoes_itens, equipes_pessoas, equipes_equipes, carteira, carteira_itens,
+  constantes e projetos. Elas são refeitas a cada gravação e ao abrir o programa;
+  servem só para ver/filtrar. Para mudar dados, use o programa (o que é editado
+  direto nessas tabelas é desfeito). Os dados de verdade ficam na tabela "dados".
+
+ESTRUTURAS DOS NORMATIVOS (DIS-NOR-013, 014, 016 e 018)
+- As estruturas e as tabelas de escolha NÃO vêm no programa: são carregadas por
+  planilha. Tela Composições > "Carregar planilha dos normativos..." > escolher
+  o arquivo (ex.: Normativos_Neoenergia_para_carregar.xlsx). Ao lado do botão
+  aparece quantas estruturas e tabelas estão carregadas.
+- A planilha tem a aba "Estruturas" (mesmas colunas da "Lista corrida") e a aba
+  "Tabelas" (uma linha por opção de material de cada tabela do normativo). A aba
+  "Leia-me" da planilha explica cada coluna.
+- Cada aba carregada substitui por inteiro o que estava no sistema. Para corrigir,
+  edite a planilha e carregue de novo. Pode carregar só uma das abas: a outra
+  continua como estava. Fica gravado no banco (ceneged.db) para todos que usam a
+  mesma pasta de dados. Consulta: estruturas_normativo, estruturas_normativo_itens
+  e normativo_tabelas.
+- Ao carregar, cada estrutura ATUALIZA a composição que já existe com o mesmo
+  nome (ou com esse nome nos apelidos): só os materiais mudam; nome, apelidos,
+  categoria e "usar automaticamente" ficam como estavam. Os materiais de antes
+  ficam guardados na composição (itens_antes). Estrutura que ainda não existe vira
+  composição nova (categoria = o normativo). Carregar de novo só atualiza.
+- No relatório, o balão com o nome ou com qualquer apelido dessa composição traz
+  os materiais do normativo, já escolhidos para o poste e o cabo da folha. Para
+  voltar a usar os materiais fixos da composição, desmarque "Usar estruturas dos
+  normativos".
+- Itens "A DEFINIR" são escolhidos pela aba Tabelas, usando o cabo da folha
+  (bitola e tipo), fase/neutro, tensão (15 / 36,2 kV), o poste (DT ou circular,
+  altura) e a região (padrão: Nordeste).
+- Quando a tabela tem mais de uma opção válida, ou falta informação, o item vem
+  no relatório marcado como pendente, com as opções. Quem confere escolhe.
+- Ainda ficam pendentes: cruzeta (DIS-NOR-012), itens de escolha manual e
+  cinta/parafuso/suporte quando o balão não traz o poste.
+- Conector de rede nua: compressão por padrão (config "conector_nua").
+
+CONECTOR PERFURANTE (FLBIT / FLABIT / IT-R / ITF-R) COM O NORMATIVO
+- IT-R: 4 conectores; ITF-R: 6 conectores (DIS-NOR-014). O conector sai pela
+  tabela do normativo conforme o cabo (ex.: PB70 -> 2412002). A derivação é
+  considerada do mesmo tamanho do cabo da rede; se for outra, ajuste na conferência.
+- FLBIT e FLABIT: o normativo não traz conector; o programa coloca 4 conectores
+  perfurantes (o dos materiais extras, 2412001). Se a sua composição tiver
+  conectores, vale a quantidade dela.
+- Mesmo poste com FLBIT/FLABIT + IT-R/ITF-R:
+    meio de rede -> soma os dois (ex.: FLBIT 4 + IT-R 4 = 8);
+    fim de rede  -> só os do IT-R/ITF-R.
+- FLBIT/FLABIT sozinho: 4 conectores, no fim ou no meio da rede.
+
+POSTES (DIS-ETE-011) - CINTA, PARAFUSO E SUPORTE AUTOMÁTICOS
+- A planilha dos normativos tem a aba "Postes" (dimensões do Anexo I da
+  DIS-ETE-011) e a aba "Altura de aplicação" (a que distância do topo a peça é
+  fixada). Carregue a planilha de novo para elas entrarem.
+- Com o poste do balão (ex.: 400/12) o programa calcula o diâmetro (circular) ou
+  a face A (DT) no ponto de fixação: topo + (base - topo) x distância / altura
+  (o poste afina 20 mm por metro; a face A do DT, 28 mm por metro).
+    cinta    -> a menor cinta que abraça esse diâmetro;
+    parafuso -> dimensão do poste + 90 mm por cruzeta atravessada + 35 mm;
+    suporte  -> pelo diâmetro (DT: o suporte de poste duplo T).
+- Balão sem D/DT/C: vale o tipo que existe no Nordeste para essa altura e
+  resistência (400/12 e 600/12 -> DT; 1000/12 -> circular). Isso também decide a
+  coluna de quantidade (DT ou circular) das estruturas.
+- Distâncias do topo usadas (aba "Altura de aplicação", pode ajustar): rede
+  compacta e MT multiplexada 0,5 m; rede nua 0,2 m; BT sozinha no poste 0,5 m;
+  BT com MT no poste 1,5 m; suporte de equipamento 1,0 m.
+- O item "POSTE DE CONCRETO" das estruturas não entra: o poste vem do balão.
+
+TABELAS DOS NORMATIVOS DENTRO DO PROGRAMA (VER E EDITAR)
+- Tela Materiais extras: botão "Tabelas dos normativos" (embaixo, ao lado dos
+  botões dos itens) ou "Ver / editar tabelas" (linha dos Normativos). Com um item
+  vermelho selecionado, a janela já abre na tabela dele.
+- Na janela: lista das tabelas à esquerda (inclui Postes e Altura de aplicação),
+  linhas à direita, o que decide a escolha e as estruturas que usam a tabela.
+- Editar: duplo clique na célula, digite e Enter. "Adicionar linha" / "Remover
+  linha". Nada vale até clicar em "Salvar alterações" (vale para os próximos
+  relatórios, para todos que usam a mesma pasta de dados).
+  Faixa de bitola: "35 a 50". Pares: "25/25; 35/35". Tipo "cunha" = conector cunha.
+- "Baixar planilha dos normativos (com as alterações)": gera a planilha com tudo
+  que está no sistema. ATENÇÃO: carregar uma planilha antiga desfaz o que foi
+  editado aqui; baixe a planilha nova e use ela daqui para frente.
+- Quem só tem permissão de consulta vê as tabelas, mas não edita.
+
+MODELOS DE PLANILHA (BOTÕES "BAIXAR MODELO")
+- Tela Materiais extras, linha de cima: "Baixar modelo" = modelo da planilha de
+  materiais extras (materiais interligados). Linha dos Normativos: "Baixar
+  modelo" = modelo da planilha dos normativos.
+- Cada modelo tem a aba "Como preencher" (explica cada coluna) e linhas de
+  EXEMPLO. Linhas/classificação que começam com "EXEMPLO" não são carregadas;
+  carregar o modelo sem dados reais não apaga nada do sistema.
+- O que importa são os títulos das colunas (nome da aba, ordem e colunas a mais
+  não importam). Materiais extras: a primeira aba é a que é lida; verde =
+  classificação, azul claro = material principal, branco = materiais que vêm junto.
+
+QUANDO O NORMATIVO NÃO DECIDE (CRUZETA, ALÇA...)
+- Item "A DEFINIR" que a tabela não resolve usa o material da SUA composição da
+  mesma estrutura (ex.: B3 -> "B3 - CCL": cruzeta CONC L 1700 3310013, alça
+  4AWG 430MM 3430120). Se você tem variantes com materiais diferentes (N1 - CCR,
+  N1 - CCT, N1 - CRUZETA DE FIBRA), o item fica pendente listando as opções.
+- Estrutura em poste existente: o poste é lido da etiqueta do desenho
+  ("12600D | B3 | CE2  M001347") e aparece como [poste existente 12600D].
+- Passe o mouse sobre as linhas das listas para ver o texto completo.
+
+"USADO QUANDO" E "POSTES FIXOS" (JANELA DAS TABELAS)
+- Coluna "Usado quando (automático)": em que situação o sistema escolhe cada
+  material. Cinta/suporte: os postes (do Nordeste) que caem nela; parafuso: os
+  postes por quantidade de cruzetas atravessadas; alça/conector/cabo: a bitola
+  do cabo, a faixa, a tensão. É calculada, não se edita.
+- Coluna "Postes fixos" (tabelas de cinta, parafuso e suporte): escreva os
+  postes que devem usar aquele material, ex.: 9/600; 11/400; 12/1000 C. Isso
+  manda mais que o cálculo. Salve a tabela para valer.
+- A planilha baixada pelo programa leva a coluna "Postes fixos" junto.
+- Tabela 1 do DIS-NOR-018 (rede nua): cada linha é uma combinação cabo principal
+  x derivação; "Cód. usado" é o conector de compressão da linha (ou cunha).
+- Tabelas sem regra no normativo (ex.: braçadeiras, grampos, cabos EPR): o item
+  vem pendente para quem confere escolher. Para não precisar escolher toda vez,
+  marque "sim" na coluna "Usar sempre" da linha certa e salve. Conectores
+  perfurantes da rede compacta (Tabelas 28 e 29 do DIS-NOR-013) agora saem pela
+  faixa de bitola escrita na descrição.
+
+
+BANCO DE DADOS (MONGODB ATLAS)
+------------------------------
+- Coleções do banco "ceneged": conjuntos (cadastro, composições, usuários, normativos...),
+  projetos (um por projeto), obras (uma por obra da carteira), acessos (último acesso)
+  e instalador (versão nova do programa para a atualização automática).
+- Sem internet: o programa avisa "Sem conexão com o banco de dados" e não grava nada.
+  Quando a internet voltar, clique em "Tentar de novo".
+- Cópia de segurança: o Atlas gratuito não faz. Uma vez por dia, quando um administrador
+  entra no programa, tudo é salvo em Documentos\Ceneged Levantamento - Backup\AAAA-MM-DD.zip
+  (guarda 30 dias).
+- O banco_mongo.txt tem a senha e vai dentro do instalador: quem tem o instalador
+  consegue ler. Use um usuário do banco só para este programa. Se precisar trocar a
+  senha: troque no Atlas, troque no banco_mongo.txt, aumente a versão e gere o
+  instalador de novo (instale você primeiro: os outros recebem pela atualização).
+- Tabelas para ver: o banco "ceneged_tabelas" (no Data Explorer do Atlas) tem os dados
+  organizados como planilha, uma linha por registro: estruturas e estruturas_itens,
+  normativo_tabelas e normativo_tabelas_linhas, postes, alturas_aplicacao, composicoes e
+  composicoes_itens, materiais, constantes, usuarios, acessos, equipes, obras, projetos.
+  A tabela "_dicionario" explica cada uma e como se ligam. Atualiza sozinho a cada gravação.
+  É só para ver: mudar algo lá não muda o programa (o programa usa o banco "ceneged").
+- Plano gratuito do Atlas: 512 MB. Sobra muito para os dados; o instalador guardado para
+  a atualização ocupa uns 60 MB (só a versão mais nova fica).

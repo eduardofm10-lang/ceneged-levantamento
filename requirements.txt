@@ -1,0 +1,7 @@
+# Bibliotecas do programa (pip install -r requirements.txt)
+pypdfium2
+opencv-python-headless
+numpy
+pillow
+openpyxl
+pymongo

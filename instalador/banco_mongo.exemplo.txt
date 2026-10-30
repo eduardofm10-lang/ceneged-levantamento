@@ -1,0 +1,6 @@
+# Endereco do banco de dados MongoDB (Atlas) usado pelo programa.
+# 1) Troque COLOQUE_A_SENHA_AQUI pela senha do usuario do banco
+#    (MongoDB Atlas > Database Access). Deixe o resto igual.
+# 2) Salve e rode o GERAR_INSTALADOR.bat: este arquivo vai junto no instalador.
+# NAO mande este arquivo para ninguem e NAO coloque no GitHub (tem a senha).
+mongodb+srv://USUARIO_DO_BANCO:COLOQUE_A_SENHA_AQUI@cluster0.xxxxx.mongodb.net/ceneged?compressors=zlib&retryWrites=true&w=majority&appName=CenegedLevantamento

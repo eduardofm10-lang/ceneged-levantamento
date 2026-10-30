@@ -1,0 +1,31 @@
+=====================================================================
+  COMECE AQUI  -  Ceneged Levantamento de Materiais (banco MongoDB)
+=====================================================================
+
+CHECKLIST (marque com X conforme for fazendo)
+
+ [ ] 1. MongoDB Atlas > Network Access > Add IP Address >
+        Allow Access from Anywhere > Confirm.
+
+ [ ] 2. Abrir o banco_mongo.txt no Bloco de Notas, trocar
+        COLOQUE_A_SENHA_AQUI pela senha do usuário do banco. Salvar.
+
+ [ ] 3. Dois cliques no GERAR_INSTALADOR.bat e esperar o PRONTO!
+        (deve aparecer "Versão 1.6 publicada no banco de dados").
+
+ [ ] 4. No SEU computador: dois cliques no Instalar_CenegedLevantamento.exe,
+        Avançar... Concluir. Entrar com seu usuário e senha.
+        (Na primeira vez ele leva os dados antigos para o banco.)
+
+ [ ] 5. Menu ☰ > Usuários: criar o usuário de cada colaborador.
+
+ [ ] 6. Mandar o Instalar_CenegedLevantamento.exe para cada colaborador.
+        Ele instala (Avançar... Concluir) e entra com o usuário dele.
+        Não precisa de OneDrive nem de pasta compartilhada.
+
+VERSÃO NOVA
+  1. Trocar os arquivos novos nesta pasta.
+  2. Botão direito no GERAR_INSTALADOR.bat > Editar: aumentar  set VERSAO=1.6
+     para 1.7 (depois 1.8...). Salvar.
+  3. Dois cliques no GERAR_INSTALADOR.bat. Cada pessoa recebe o aviso
+     "Nova versão disponível" ao abrir o programa e clica Sim.
